@@ -1,0 +1,31 @@
+<%#
+  Shared email header. Params: title (string), preheader (inbox preview text), eyebrow (optional label under the logo).
+  `brand` is injected by MailService for every template.
+%><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title><%= title %></title>
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;"><%= locals.preheader || '' %>&#8203;</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f5f9;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #dbe4ee;border-radius:16px;overflow:hidden;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+          <tr>
+            <td style="height:5px;line-height:5px;font-size:0;background:#2563eb;background-image:linear-gradient(90deg,#2563eb,#0f766e,#14b8a6);">&nbsp;</td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:28px 32px 22px;border-bottom:1px solid #e2e8f0;">
+              <a href="<%= brand.website %>" style="text-decoration:none;">
+                <span style="font-size:26px;font-weight:800;letter-spacing:3px;color:#0f172a;"><%= brand.name %></span>
+              </a>
+              <div style="margin-top:6px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#0f766e;"><%= locals.eyebrow || brand.tagline %></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="content" style="padding:32px;font-size:15px;line-height:1.7;color:#334155;">

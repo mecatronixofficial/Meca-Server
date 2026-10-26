@@ -1,0 +1,10 @@
+<%# Newsletter unsubscribe confirmation. Data: email, actionUrl %>
+<%- include('partials/top', { title: 'Unsubscribe', eyebrow: 'Newsletter' }) %>
+<div class="icon info" aria-hidden="true">✉</div>
+<h1>Unsubscribe from our newsletter?</h1>
+<p><strong><%= email %></strong> will stop receiving updates and offers from <%= brand.name %>. You can subscribe again at any time.</p>
+<form method="post" action="<%= actionUrl %>">
+  <button class="btn danger" type="submit">Unsubscribe</button>
+</form>
+<a class="btn secondary" href="<%= brand.website %>">Keep me subscribed</a>
+<%- include('partials/bottom') %>

@@ -1,0 +1,15 @@
+<%# API landing page. Data: version, environment, database ('up' | 'down'), mail (bool), docsUrl (optional), healthUrl %>
+<%- include('partials/top', { title: 'API', eyebrow: 'API Server' }) %>
+<h1><%= brand.name %> API</h1>
+<p>This server powers the <%= brand.name %> website and admin panel.</p>
+<div class="meta">
+  <span class="pill <%= database === 'up' ? 'up' : 'down' %>">Database <%= database %></span>
+  <span class="pill <%= mail ? 'up' : 'down' %>">Email <%= mail ? 'on' : 'off' %></span>
+  <span class="pill up">v<%= version %> · <%= environment %></span>
+</div>
+<ul class="links">
+  <% if (locals.docsUrl) { %><li><a href="<%= docsUrl %>">API documentation <span>Swagger →</span></a></li><% } %>
+  <li><a href="<%= healthUrl %>">Health check <span>JSON →</span></a></li>
+  <li><a href="<%= brand.website %>">Website <span><%= brand.websiteLabel %> →</span></a></li>
+</ul>
+<%- include('partials/bottom') %>

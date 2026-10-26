@@ -1,0 +1,22 @@
+<%#
+  Shared email footer. Params: note (optional small print), unsubscribeUrl (optional, marketing emails only).
+%>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:24px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;font-size:12px;line-height:1.7;color:#64748b;">
+              <% if (locals.note) { %><p style="margin:0 0 10px;"><%= note %></p><% } %>
+              <p style="margin:0;"><a href="<%= brand.website %>" style="color:#2563eb;text-decoration:none;"><%= brand.websiteLabel %></a><% if (brand.supportEmail) { %>&nbsp;&middot;&nbsp;<a href="mailto:<%= brand.supportEmail %>" style="color:#2563eb;text-decoration:none;"><%= brand.supportEmail %></a><% } %></p>
+              <p style="margin:8px 0 0;">&copy; <%= brand.year %> <%= brand.name %>. All rights reserved.</p>
+              <% if (locals.unsubscribeUrl) { %>
+                <p style="margin:10px 0 0;">You are receiving this because you subscribed to <%= brand.name %> updates.
+                  <a href="<%= unsubscribeUrl %>" style="color:#64748b;text-decoration:underline;">Unsubscribe</a></p>
+              <% } %>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

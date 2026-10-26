@@ -1,0 +1,12 @@
+<%# Data: name, email, phone, password, role, loginUrl %>
+<%- include('partials/header', { title: 'Your ' + brand.name + ' admin account', preheader: 'Your admin account is ready. Sign in and change your temporary password.', eyebrow: 'Admin Portal' }) %>
+<h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;color:#0f172a;">Welcome to the team, <%= name %>!</h1>
+<p style="margin:0 0 12px;">An admin account has been created for you on the <strong><%= brand.name %></strong> admin panel. Use the details below to sign in.</p>
+<%- include('partials/details', { rows: [
+  ['Email', email],
+  ['Temporary password', password, true],
+  ['Access level', role === 'superadmin' ? 'Superadmin' : 'Admin'],
+] }) %>
+<%- include('partials/button', { href: loginUrl, label: 'Sign in to the admin panel' }) %>
+<%- include('partials/notice', { tone: 'warning', heading: 'Change your password after signing in', text: 'This password was sent by email, so treat it as temporary. Choose a new one from your profile as soon as you sign in, and never share it with anyone.' }) %>
+<%- include('partials/footer', { note: 'You received this email because a superadmin created an account for you.' }) %>

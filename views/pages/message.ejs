@@ -1,0 +1,8 @@
+<%# Generic result page. Data: title, heading, message, tone ('success' | 'error' | 'info'), action ({ href, label }) optional. %>
+<%- include('partials/top', { title: title }) %>
+<% var symbol = { success: '✓', error: '!', info: 'i' }[tone] || 'i'; %>
+<div class="icon <%= tone %>" aria-hidden="true"><%= symbol %></div>
+<h1><%= heading %></h1>
+<p><%= message %></p>
+<% if (locals.action) { %><a class="btn" href="<%= action.href %>"><%= action.label %></a><% } %>
+<%- include('partials/bottom') %>
