@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminsModule } from './admins/admins.module';
 import { AuthModule } from './auth/auth.module';
 import { BannersModule } from './banners/banners.module';
+import { TeamModule } from './team/team.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { ClientsModule } from './clients/clients.module';
 import { CommonModule } from './common/common.module';
 import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { SiteThrottlerGuard } from './common/guards/site-throttler.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { SiteRevalidateInterceptor } from './common/interceptors/site-revalidate.interceptor';
 import { validateEnvironment } from './config/environment';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ENTITIES } from './database/entities';
@@ -22,9 +25,12 @@ import { HealthController } from './health/health.controller';
 import { InvoicesModule } from './invoices/invoices.module';
 import { MailModule } from './mail/mail.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
+import { PreviewsModule } from './previews/previews.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
+import { ThirukkuralModule } from './thirukkural/thirukkural.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { WorksModule } from './works/works.module';
 
@@ -64,20 +70,26 @@ import { WorksModule } from './works/works.module';
     ProjectsModule,
     WorksModule,
     BannersModule,
+    TeamModule,
     EnquiriesModule,
     NewslettersModule,
     VouchersModule,
     InvoicesModule,
+    PreviewsModule,
+    SettingsModule,
+    ThirukkuralModule,
     DashboardModule,
   ],
   controllers: [HealthController],
   providers: [
     // Guard order matters: rate limit, then authenticate, then authorize.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: SiteThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    // Refreshes the public website's cached content after admin edits
+    { provide: APP_INTERCEPTOR, useClass: SiteRevalidateInterceptor },
   ],
 })
 export class AppModule {}

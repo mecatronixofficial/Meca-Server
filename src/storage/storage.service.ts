@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { detectFileType } from './file-type';
 
 /** Folders uploads may be grouped into inside the bucket. */
-export const UPLOAD_FOLDERS = ['uploads', 'admins', 'banners', 'blogs', 'clients', 'projects', 'works', 'vouchers', 'invoices'] as const;
+export const UPLOAD_FOLDERS = ['uploads', 'admins', 'banners', 'blogs', 'clients', 'projects', 'works', 'vouchers', 'invoices', 'previews', 'team'] as const;
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
 
 export interface UploadedObject {

@@ -17,6 +17,21 @@ export class Banner extends TimestampedEntity {
   @Column('integer')
   position: number;
 
+  /** Short label above the title, e.g. "New launch". */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  tag: string | null;
+
+  /** Up to four short points shown with the banner. */
+  @Column('text', { array: true, default: () => "'{}'" })
+  highlights: string[];
+
+  /** Optional button: its text and where it goes (a site path like /contact, or a full URL). */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  cta_label: string | null;
+
+  @Column({ type: 'varchar', length: 300, nullable: true })
+  cta_link: string | null;
+
   @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   time: Date;
 

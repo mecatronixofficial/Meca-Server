@@ -7,6 +7,7 @@ import { Client } from '../clients/entities/client.entity';
 import { Enquiry } from '../enquiries/entities/enquiry.entity';
 import { Newsletter } from '../newsletters/entities/newsletter.entity';
 import { Project } from '../projects/entities/project.entity';
+import { SitePreview } from '../previews/entities/site-preview.entity';
 import { Review } from '../reviews/entities/review.entity';
 import { Work } from '../works/entities/work.entity';
 
@@ -15,7 +16,7 @@ export class DashboardService {
   constructor(private readonly db: DataSource) {}
 
   async stats() {
-    const [banners, blogs, clients, works, projects, subscribers, reviews, enquiries, admins] = await Promise.all([
+    const [banners, blogs, clients, works, projects, subscribers, reviews, enquiries, admins, previews] = await Promise.all([
       this.count(Banner),
       this.count(Blog),
       this.count(Client),
@@ -25,8 +26,9 @@ export class DashboardService {
       this.split(Review, { is_verified: true }, 'verified', 'unverified'),
       this.split(Enquiry, { is_opened: true }, 'opened', 'unopened'),
       this.split(Admin, { role: AdminRole.SUPERADMIN }, 'superadmin', 'admin'),
+      this.split(SitePreview, { is_contacted: true }, 'contacted', 'uncontacted'),
     ]);
-    return { banners, blogs, clients, works, projects, reviews, enquiries, subscribers, admins };
+    return { banners, blogs, clients, works, projects, reviews, enquiries, subscribers, admins, previews };
   }
 
   private count<T extends ObjectLiteral>(entity: EntityTarget<T>) {

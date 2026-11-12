@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { ok } from '../common/api-response';
+import { Public } from '../common/decorators/auth.decorators';
 import { ListQueryDto } from '../common/pagination';
 import { BlogsService } from './blogs.service';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
@@ -18,6 +19,13 @@ export class BlogsController {
   @Get('all')
   async findAll(@Query() query: ListQueryDto) {
     return ok('Blogs fetched successfully.', await this.blogs.findAll(query));
+  }
+
+  /** Published blogs only, newest first. Used by the public website; drafts stay private. */
+  @Public()
+  @Get('published')
+  async findPublished() {
+    return ok('Blogs fetched successfully.', await this.blogs.findPublished());
   }
 
   @Put('edit/:id')
