@@ -15,7 +15,6 @@ import { ThirukkuralChapter } from '../thirukkural/entities/thirukkural-chapter.
 import { Thirukkural } from '../thirukkural/entities/thirukkural.entity';
 import { TeamMember } from '../team/entities/team-member.entity';
 import { Voucher } from '../vouchers/entities/voucher.entity';
-import { SiteSetting } from '../settings/entities/site-setting.entity';
 import { Work } from '../works/entities/work.entity';
 
 /** Every TypeORM entity, shared by the Nest app and the CLI data source (migrations, seeds). */
@@ -26,6 +25,7 @@ export const ENTITIES = [
   Client,
   Review,
   Project,
+  ProjectMedia,
   Work,
   Banner,
   Enquiry,
