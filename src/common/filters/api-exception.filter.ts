@@ -27,7 +27,10 @@ export class ApiExceptionFilter implements ExceptionFilter {
     const error = this.describe(exception);
 
     if (error.status >= 500) {
-      this.logger.error(`${request.method} ${request.url}`, exception instanceof Error ? exception.stack : String(exception));
+      const detail = exception as { message?: unknown; code?: unknown } | null | undefined;
+      const message = typeof detail?.message === 'string' ? detail.message : String(exception);
+      const code = typeof detail?.code === 'string' ? ` [${detail.code}]` : '';
+      this.logger.error(`${request.method} ${request.url}: ${message}${code}`, exception instanceof Error ? exception.stack : undefined);
     }
 
     response.status(error.status).json({

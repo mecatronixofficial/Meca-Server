@@ -13,6 +13,7 @@ import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { SiteRevalidateInterceptor } from './common/interceptors/site-revalidate.interceptor';
 import { validateEnvironment } from './config/environment';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ENTITIES } from './database/entities';
@@ -22,9 +23,13 @@ import { HealthController } from './health/health.controller';
 import { InvoicesModule } from './invoices/invoices.module';
 import { MailModule } from './mail/mail.module';
 import { NewslettersModule } from './newsletters/newsletters.module';
+import { PreviewsModule } from './previews/previews.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
+import { TeamModule } from './team/team.module';
+import { ThirukkuralModule } from './thirukkural/thirukkural.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { WorksModule } from './works/works.module';
 
@@ -62,13 +67,17 @@ import { WorksModule } from './works/works.module';
     ClientsModule,
     ReviewsModule,
     ProjectsModule,
+    PreviewsModule,
     WorksModule,
     BannersModule,
+    TeamModule,
     EnquiriesModule,
     NewslettersModule,
     VouchersModule,
     InvoicesModule,
     DashboardModule,
+    SettingsModule,
+    ThirukkuralModule,
   ],
   controllers: [HealthController],
   providers: [
@@ -78,6 +87,7 @@ import { WorksModule } from './works/works.module';
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: SiteRevalidateInterceptor },
   ],
 })
 export class AppModule {}

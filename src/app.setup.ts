@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+﻿import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ModulesContainer } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -43,8 +43,8 @@ export function configureApp(app: NestExpressApplication): NestExpressApplicatio
   app.use(cookieParser());
   app.useBodyParser('json', { limit: '1mb' });
   app.useBodyParser('urlencoded', { limit: '1mb', extended: true });
-  app.enableCors({ origin: origins, credentials: true });
-  // Unknown fields are stripped rather than rejected, so clients can send back whole records (id, createdAt…) on edit.
+  app.enableCors({ origin: origins.map((origin) => new URL(origin).origin), credentials: true });
+  // Unknown fields are stripped rather than rejected, so clients can send back whole records (id, createdAtâ€¦) on edit.
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false, transform: true }));
 
   // Server-rendered pages (home, unsubscribe, password reset) share the email brand values.
