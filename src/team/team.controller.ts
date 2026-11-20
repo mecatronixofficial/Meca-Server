@@ -18,6 +18,12 @@ export class TeamController {
     return ok('Team member added successfully', await this.team.create(dto));
   }
 
+  /** Admin list (mec-admin "Team & founders"): every member, hidden ones included, in display order. */
+  @Get('all')
+  async findAllForAdmin(@Query() query: ListQueryDto) {
+    return ok('Team fetched successfully', await this.team.findAll(query));
+  }
+
   /**
    * Admins: every member, hidden ones included. Public website (no admin session):
    * active members only.
