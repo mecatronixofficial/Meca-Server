@@ -6,8 +6,6 @@ import {
   IsBoolean,
   IsEmail,
   IsIn,
-  IsLatitude,
-  IsLongitude,
   IsNotEmpty,
   IsString,
   IsUrl,
@@ -106,20 +104,6 @@ export class AddressDto {
   @IsUrl(webUrl, { message: 'Map link must be a full URL starting with https://' })
   @MaxLength(300)
   map_url: string;
-
-  /**
-   * Map position (decimal degrees), optional. The website's "Find us" dashboard uses it for exact
-   * directions and to estimate a visitor's distance and arrival time. Both or neither.
-   */
-  @ValidateIf((o: AddressDto) => o.lat != null || o.lng != null)
-  @Type(() => Number)
-  @IsLatitude({ message: 'Latitude must be between -90 and 90 (and given with longitude)' })
-  lat?: number | null;
-
-  @ValidateIf((o: AddressDto) => o.lat != null || o.lng != null)
-  @Type(() => Number)
-  @IsLongitude({ message: 'Longitude must be between -180 and 180 (and given with latitude)' })
-  lng?: number | null;
 }
 
 export class BusinessHoursDto {
@@ -165,25 +149,4 @@ export class ContactSettingsDto {
   @ValidateNested()
   @Type(() => BusinessHoursDto)
   hours: BusinessHoursDto;
-
-  /**
-   * Google Business "write a review" link — the same link as the printed review QR code
-   * (Google Business Profile -> "Ask for reviews"). The website's "Write a review" button opens it.
-   * Optional: when a save leaves it out, the saved link is kept.
-   */
-  @Trim()
-  @ValidateIf((_, value) => value !== '' && value !== undefined && value !== null)
-  @IsUrl(webUrl, { message: 'Google review link must be a full URL starting with https://' })
-  @MaxLength(300)
-  review_url?: string;
-
-  /**
-   * The Google Business profile on Google Maps, for the website's "See us on Google" button.
-   * Optional: when a save leaves it out, the saved link is kept.
-   */
-  @Trim()
-  @ValidateIf((_, value) => value !== '' && value !== undefined && value !== null)
-  @IsUrl(webUrl, { message: 'Google profile link must be a full URL starting with https://' })
-  @MaxLength(300)
-  google_profile_url?: string;
 }

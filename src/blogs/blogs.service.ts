@@ -22,6 +22,10 @@ export class BlogsService {
     return paginate(applySearch(qb, ['b.blog_name', 'b.short_description'], query.search), query);
   }
 
+  findPublished() {
+    return this.blogs.find({ where: { is_active: true }, order: { createdAt: 'DESC' } });
+  }
+
   async findOne(id: string) {
     const blog = await this.blogs.findOneBy({ id });
     if (!blog) throw new NotFoundException('Blog not found');

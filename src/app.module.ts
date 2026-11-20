@@ -1,19 +1,25 @@
+
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AdminsModule } from './admins/admins.module';
 import { AuthModule } from './auth/auth.module';
 import { BannersModule } from './banners/banners.module';
+import { TeamModule } from './team/team.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { ClientsModule } from './clients/clients.module';
 import { CommonModule } from './common/common.module';
+
 import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { SiteThrottlerGuard } from './common/guards/site-throttler.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { SiteRevalidateInterceptor } from './common/interceptors/site-revalidate.interceptor';
+
 import { validateEnvironment } from './config/environment';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ENTITIES } from './database/entities';
@@ -28,30 +34,47 @@ import { ProjectsModule } from './projects/projects.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SettingsModule } from './settings/settings.module';
 import { StorageModule } from './storage/storage.module';
-import { TeamModule } from './team/team.module';
 import { ThirukkuralModule } from './thirukkural/thirukkural.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { WorksModule } from './works/works.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, cache: true, validate: validateEnvironment }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      validate: validateEnvironment,
+    }),
+
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [
-        { ttl: config.getOrThrow<number>('RATE_LIMIT_WINDOW_MS'), limit: config.getOrThrow<number>('RATE_LIMIT_MAX_REQUESTS') },
+        {
+          ttl: config.getOrThrow<number>('RATE_LIMIT_WINDOW_MS'),
+          limit: config.getOrThrow<number>('RATE_LIMIT_MAX_REQUESTS'),
+        },
       ],
     }),
+
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: postgresUrl(config.getOrThrow<string>('DATABASE_URL')),
-        ssl: postgresSsl({ DB_SSL: config.get('DB_SSL'), DB_SSL_CA: config.get('DB_SSL_CA') }),
+        ssl: postgresSsl({
+          DB_SSL: config.get('DB_SSL'),
+          DB_SSL_CA: config.get('DB_SSL_CA'),
+        }),
         entities: ENTITIES,
-        synchronize: config.get('DB_SYNCHRONIZE') === 'true' && config.get('NODE_ENV') !== 'production',
+        synchronize:
+          config.get('DB_SYNCHRONIZE') === 'true' &&
+          config.get('NODE_ENV') !== 'production',
         logging: config.get('DB_LOGGING') === 'true',
-        extra: { max: config.get<number>('DATABASE_CONNECTION_LIMIT'), connectionTimeoutMillis: 5000, idleTimeoutMillis: 30000 },
+        extra: {
+          max: config.get<number>('DATABASE_CONNECTION_LIMIT'),
+          connectionTimeoutMillis: 5000,
+          idleTimeoutMillis: 30000,
+        },
       }),
     }),
 
@@ -75,18 +98,26 @@ import { WorksModule } from './works/works.module';
     NewslettersModule,
     VouchersModule,
     InvoicesModule,
-    DashboardModule,
     SettingsModule,
     ThirukkuralModule,
+    DashboardModule,
   ],
+
   controllers: [HealthController],
+
   providers: [
-    // Guard order matters: rate limit, then authenticate, then authorize.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Global guards
+    { provide: APP_GUARD, useClass: SiteThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+
+    // Global exception filter
     { provide: APP_FILTER, useClass: ApiExceptionFilter },
+
+    // Global interceptors
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
+
+    // Refresh public website cache after admin edits
     { provide: APP_INTERCEPTOR, useClass: SiteRevalidateInterceptor },
   ],
 })

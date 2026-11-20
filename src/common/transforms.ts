@@ -18,3 +18,6 @@ export const TrimToNull = () =>
 
 /** Trims and lower-cases string input (and each item of a string array). */
 export const TrimLower = () => Transform(({ value }) => (Array.isArray(value) ? value.map((v) => clean(v, true)) : clean(value, true)));
+
+/** Trims string input; an empty string becomes null (clears an optional column). */
+export const TrimToNull = () => Transform(({ value }) => (typeof value === 'string' ? value.trim() || null : value));

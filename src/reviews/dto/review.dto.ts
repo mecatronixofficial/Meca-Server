@@ -8,15 +8,18 @@ export class CreateReviewDto {
   @Trim()
   @IsString()
   @IsNotEmpty({ message: 'User name is required' })
+  @MaxLength(100, { message: 'Name cannot exceed 100 characters' })
   user_name: string;
 
   @TrimLower()
   @IsEmail({}, { message: 'Please provide a valid email address' })
+  @MaxLength(254)
   user_email: string;
 
   @IsOptional()
   @TrimLower()
   @IsString()
+  @MaxLength(120, { message: 'Company name cannot exceed 120 characters' })
   company_name?: string;
 
   @Type(() => Number)

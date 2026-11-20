@@ -4,9 +4,7 @@ import { validate } from 'class-validator';
 import { Repository } from 'typeorm';
 import { ContactSettingsDto } from './dto/contact-settings.dto';
 import { SiteSetting } from './entities/site-setting.entity';
-import { TechStackDto } from './dto/tech-stack.dto';
-import { MecaBoardDto } from './dto/meca-board.dto';
-import { DEFAULT_CONTACT, DEFAULT_MECA_BOARD, DEFAULT_TECH, SettingsService } from './settings.service';
+import { DEFAULT_CONTACT, SettingsService } from './settings.service';
 
 const valid = () => JSON.parse(JSON.stringify(DEFAULT_CONTACT)) as ContactSettingsDto;
 

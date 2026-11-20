@@ -33,9 +33,20 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [context.getHandler(), context.getClass()]);
-    if (isPublic) return true;
-
     const request = context.switchToHttp().getRequest<AuthRequest>();
+
+    // Public routes stay open, but still recognise a signed-in admin so a handler can show
+    // them more (e.g. unverified reviews) than an anonymous visitor. Bad tokens are ignored here.
+    if (isPublic) {
+      await this.authenticate(request).catch(() => undefined);
+      return true;
+    }
+
+    await this.authenticate(request);
+    return true;
+  }
+
+  private async authenticate(request: AuthRequest) {
     const header = request.headers.authorization;
     const bearer = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
     const token = (request.cookies?.[AUTH_COOKIE] as string | undefined) ?? bearer;

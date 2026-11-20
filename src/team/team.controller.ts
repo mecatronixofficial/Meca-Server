@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ok } from '../common/api-response';
 import { Public } from '../common/decorators/auth.decorators';
+import type { AuthRequest } from '../common/guards/jwt-auth.guard';
 import { ListQueryDto } from '../common/pagination';
 import { CreateTeamMemberDto, UpdateTeamMemberDto } from './dto/team-member.dto';
 import { TeamMember } from './entities/team-member.entity';
@@ -17,16 +18,14 @@ export class TeamController {
     return ok('Team member added successfully', await this.team.create(dto));
   }
 
-  /** The admin list includes hidden members and their publication status. */
-  @Get('all')
-  async findAll(@Query() query: ListQueryDto) {
-    return ok('Team fetched successfully', await this.team.findAll(query));
-  }
-
-  /** The public About page only receives published members. */
+  /**
+   * Admins: every member, hidden ones included. Public website (no admin session):
+   * active members only.
+   */
   @Public()
   @Get('get')
-  async findPublished(@Query() query: ListQueryDto) {
+  async findAll(@Query() query: ListQueryDto, @Req() request: Partial<AuthRequest>) {
+    if (request.user) return ok('Team fetched successfully', await this.team.findAll(query));
     const result = await this.team.findAll(query, true);
     const publicFields = ({ is_active: _active, ...member }: TeamMember) => member;
     return ok('Team fetched successfully', Array.isArray(result) ? result.map(publicFields) : { ...result, items: result.items.map(publicFields) });
