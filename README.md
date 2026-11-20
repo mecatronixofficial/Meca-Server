@@ -120,3 +120,21 @@ Production checklist:
 - **Storage:** an R2 public domain.
 - **Email:** a verified Resend sending domain.
 - **Docs:** Swagger stays off in production unless `SWAGGER_ENABLED=true`.
+
+### Vercel
+
+- Set `NODE_ENV=production` in the Vercel project (Swagger off, secure cookies, no schema sync).
+- Leave `COOKIE_DOMAIN` empty and set `ADMIN_URL=https://admin.mecatronix.one`. The admin app proxies
+  `/mec-api` through its own domain (its `vercel.json`), because the `admin_token` cookie is `SameSite=strict`.
+- On Vercel each warm instance keeps its own database pool, so the pool is capped at 3 connections
+  with a short idle timeout (`src/database/postgres-connection.ts`). Small managed databases such as
+  Aiven's free tier allow only about 20 connections in total.
+- Run migrations from your machine against the production `DATABASE_URL` after each deploy that adds
+  one: `npm run migration:run` (or `migration:run:prod` after a build).
+- Vercel limits request bodies to about 4.5 MB, so large project videos need a host without that limit.
+
+### Reading errors
+
+Database problems are reported to clients without internals: **503** "busy or unreachable, try again"
+for connection and capacity errors (e.g. `53300` too many connections), and **500** "run the database
+migrations" for a missing table or column (`42P01`, `42703`). The server log keeps the full message and code.

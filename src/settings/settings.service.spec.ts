@@ -4,7 +4,9 @@ import { validate } from 'class-validator';
 import { Repository } from 'typeorm';
 import { ContactSettingsDto } from './dto/contact-settings.dto';
 import { SiteSetting } from './entities/site-setting.entity';
-import { DEFAULT_CONTACT, SettingsService } from './settings.service';
+import { MecaBoardDto } from './dto/meca-board.dto';
+import { TechStackDto } from './dto/tech-stack.dto';
+import { DEFAULT_CONTACT, DEFAULT_MECA_BOARD, DEFAULT_TECH, SettingsService } from './settings.service';
 
 const valid = () => JSON.parse(JSON.stringify(DEFAULT_CONTACT)) as ContactSettingsDto;
 
@@ -118,7 +120,7 @@ describe('SettingsService (review link)', () => {
     const repo = {
       findOneBy: ({ key }: { key: string }) => Promise.resolve(rows.get(key) ?? null),
       save: (row: { key: string; value: unknown }) => {
-        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') } as SiteSetting);
+        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') });
         return Promise.resolve(row);
       },
     } as unknown as Repository<SiteSetting>;
@@ -132,13 +134,13 @@ describe('SettingsService (review link)', () => {
   it('saves a new link, and keeps it when a later save leaves it out', async () => {
     await service.saveContact({ ...valid(), review_url: 'https://g.page/r/NEW/review' });
     const { review_url: _omit, ...withoutReview } = valid();
-    const saved = await service.saveContact(withoutReview as ContactSettingsDto);
+    const saved = await service.saveContact(withoutReview);
     expect(saved.review_url).toBe('https://g.page/r/NEW/review');
   });
 
   it('gives details saved before the links existed the default links', async () => {
     const { review_url: _r, google_profile_url: _g, ...old } = valid();
-    rows.set('contact', { key: 'contact', value: old, updatedAt: new Date() } as SiteSetting);
+    rows.set('contact', { key: 'contact', value: old, updatedAt: new Date() });
     await expect(service.getContact()).resolves.toMatchObject({
       review_url: DEFAULT_CONTACT.review_url,
       google_profile_url: DEFAULT_CONTACT.google_profile_url,
@@ -149,7 +151,7 @@ describe('SettingsService (review link)', () => {
     expect(DEFAULT_CONTACT.google_profile_url).toContain('query_place_id=ChIJ2VtuRthZqDsRn2UPG3POkIQ');
     await service.saveContact({ ...valid(), google_profile_url: 'https://maps.google.com/?cid=1' });
     const { google_profile_url: _omit, ...withoutProfile } = valid();
-    const saved = await service.saveContact(withoutProfile as ContactSettingsDto);
+    const saved = await service.saveContact(withoutProfile);
     expect(saved.google_profile_url).toBe('https://maps.google.com/?cid=1');
   });
 });
@@ -163,7 +165,7 @@ describe('SettingsService (tech)', () => {
     const repo = {
       findOneBy: ({ key }: { key: string }) => Promise.resolve(rows.get(key) ?? null),
       save: (row: { key: string; value: unknown }) => {
-        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') } as SiteSetting);
+        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') });
         return Promise.resolve(row);
       },
     } as unknown as Repository<SiteSetting>;
@@ -196,7 +198,7 @@ describe('SettingsService (MECA board)', () => {
     const repo = {
       findOneBy: ({ key }: { key: string }) => Promise.resolve(rows.get(key) ?? null),
       save: (row: { key: string; value: unknown }) => {
-        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') } as SiteSetting);
+        rows.set(row.key, { ...row, updatedAt: new Date('2026-11-20T10:00:00Z') });
         return Promise.resolve(row);
       },
     } as unknown as Repository<SiteSetting>;

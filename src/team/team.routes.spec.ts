@@ -20,15 +20,15 @@ describe('team publication and admin routes', () => {
   const admin = { id: randomUUID(), email: 'staff@example.com', role: AdminRole.ADMIN };
   const publicId = randomUUID(), hiddenId = randomUUID();
   const originalFetch = global.fetch;
-  const storage = { upload: jest.fn(async () => [{ url: 'https://media.example.com/portrait.png' }]) };
+  const storage = { upload: jest.fn(() => Promise.resolve([{ url: 'https://media.example.com/portrait.png' }])) };
   const repository = {
     create: (dto: Partial<TeamMember>) => ({ bio: '', linkedin: null, email: null, position: 1, is_active: true, ...dto }),
-    save: jest.fn(async (member: TeamMember) => {
+    save: jest.fn((member: TeamMember) => {
       const saved = { ...member, id: member.id ?? randomUUID(), createdAt: member.createdAt ?? new Date(), updatedAt: new Date() };
       members = [...members.filter((item) => item.id !== saved.id), saved];
-      return saved;
+      return Promise.resolve(saved);
     }),
-    findOneBy: jest.fn(async ({ id }: { id: string }) => members.find((member) => member.id === id)),
+    findOneBy: jest.fn(({ id }: { id: string }) => Promise.resolve(members.find((member) => member.id === id))),
     createQueryBuilder: () => {
       let activeOnly = false, skip = 0, take = members.length;
       const ordered = () => members.filter((member) => !activeOnly || member.is_active).sort((a, b) => a.position - b.position);
@@ -37,8 +37,8 @@ describe('team publication and admin routes', () => {
         where: () => { activeOnly = true; return query; },
         skip: (value: number) => { skip = value; return query; },
         take: (value: number) => { take = value; return query; },
-        getMany: async () => ordered(),
-        getManyAndCount: async () => [ordered().slice(skip, skip + take), ordered().length],
+        getMany: () => Promise.resolve(ordered()),
+        getManyAndCount: () => Promise.resolve([ordered().slice(skip, skip + take), ordered().length]),
       };
       return query;
     },
@@ -61,7 +61,7 @@ describe('team publication and admin routes', () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(DataSource).useValue({
         options: { type: 'postgres' }, entityMetadatas: [], manager: {}, isInitialized: false,
-        getRepository: (entity: unknown) => entity === TeamMember ? repository : entity === Admin ? { findOne: async () => admin } : {},
+        getRepository: (entity: unknown) => entity === TeamMember ? repository : entity === Admin ? { findOne: () => Promise.resolve(admin) } : {},
       })
       .overrideProvider(MailService).useValue({ trySend: jest.fn() })
       .overrideProvider(StorageService).useValue(storage)

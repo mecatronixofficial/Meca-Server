@@ -23,7 +23,7 @@ import { SiteRevalidateInterceptor } from './common/interceptors/site-revalidate
 import { validateEnvironment } from './config/environment';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ENTITIES } from './database/entities';
-import { postgresSsl, postgresUrl } from './database/postgres-connection';
+import { poolOptions, postgresSsl, postgresUrl } from './database/postgres-connection';
 import { EnquiriesModule } from './enquiries/enquiries.module';
 import { HealthController } from './health/health.controller';
 import { InvoicesModule } from './invoices/invoices.module';
@@ -70,11 +70,7 @@ import { WorksModule } from './works/works.module';
           config.get('DB_SYNCHRONIZE') === 'true' &&
           config.get('NODE_ENV') !== 'production',
         logging: config.get('DB_LOGGING') === 'true',
-        extra: {
-          max: config.get<number>('DATABASE_CONNECTION_LIMIT'),
-          connectionTimeoutMillis: 5000,
-          idleTimeoutMillis: 30000,
-        },
+        extra: poolOptions(config.get<number>('DATABASE_CONNECTION_LIMIT') ?? 10, !!process.env.VERCEL),
       }),
     }),
 

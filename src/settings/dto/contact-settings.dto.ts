@@ -11,8 +11,10 @@ import {
   IsUrl,
   Matches,
   MaxLength,
+  ValidateBy,
   ValidateIf,
   ValidateNested,
+  type ValidationOptions,
 } from 'class-validator';
 import { Trim, TrimLower } from '../../common/transforms';
 
@@ -24,6 +26,22 @@ export const BUSINESS_DAYS = ['Mon-Fri', 'Mon-Sat', 'Mon-Sun'] as const;
 
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const webUrl = { require_protocol: true, protocols: ['http', 'https'] };
+
+const hasValue = (value: unknown) => value !== undefined && value !== null;
+/** Optional link: blank or missing is fine, anything else must be a full http(s) URL. */
+const isGiven = (_: object, value: unknown) => value !== '' && hasValue(value);
+
+/** A finite number within ±limit (decimal degrees), as one constraint so it reports one message. */
+function IsCoordinate(limit: number, options: ValidationOptions) {
+  return ValidateBy(
+    {
+      name: 'isCoordinate',
+      constraints: [limit],
+      validator: { validate: (value: unknown) => typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= limit },
+    },
+    options,
+  );
+}
 
 export class ContactEmailDto {
   /** e.g. "General enquiries", "Support". */
@@ -104,6 +122,15 @@ export class AddressDto {
   @IsUrl(webUrl, { message: 'Map link must be a full URL starting with https://' })
   @MaxLength(300)
   map_url: string;
+
+  /** Map position in decimal degrees (e.g. 11.0198784). Optional, but given together with `lng`. */
+  @ValidateIf((address: AddressDto) => hasValue(address.lat) || hasValue(address.lng))
+  @IsCoordinate(90, { message: 'Latitude must be between -90 and 90 (and given with longitude)' })
+  lat?: number | null;
+
+  @ValidateIf((address: AddressDto) => hasValue(address.lat) || hasValue(address.lng))
+  @IsCoordinate(180, { message: 'Longitude must be between -180 and 180 (and given with latitude)' })
+  lng?: number | null;
 }
 
 export class BusinessHoursDto {
@@ -149,4 +176,18 @@ export class ContactSettingsDto {
   @ValidateNested()
   @Type(() => BusinessHoursDto)
   hours: BusinessHoursDto;
+
+  /** Google "write a review" link (the printed review QR code). Left out: the saved link is kept. */
+  @Trim()
+  @ValidateIf(isGiven)
+  @IsUrl(webUrl, { message: 'Google review link must be a full URL starting with https://' })
+  @MaxLength(300)
+  review_url?: string;
+
+  /** Google Business profile link. Left out: the saved link is kept. */
+  @Trim()
+  @ValidateIf(isGiven)
+  @IsUrl(webUrl, { message: 'Google profile link must be a full URL starting with https://' })
+  @MaxLength(500)
+  google_profile_url?: string;
 }
