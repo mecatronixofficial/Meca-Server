@@ -1,3 +1,4 @@
+import { ProjectMedia } from '../projects/entities/project-media.entity';
 import { Admin } from '../admins/entities/admin.entity';
 import { PasswordReset } from '../auth/entities/password-reset.entity';
 import { Banner } from '../banners/entities/banner.entity';
@@ -14,6 +15,7 @@ import { ThirukkuralChapter } from '../thirukkural/entities/thirukkural-chapter.
 import { Thirukkural } from '../thirukkural/entities/thirukkural.entity';
 import { TeamMember } from '../team/entities/team-member.entity';
 import { Voucher } from '../vouchers/entities/voucher.entity';
+import { SiteSetting } from '../settings/entities/site-setting.entity';
 import { Work } from '../works/entities/work.entity';
 
 /** Every TypeORM entity, shared by the Nest app and the CLI data source (migrations, seeds). */

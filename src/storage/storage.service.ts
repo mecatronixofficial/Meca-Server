@@ -1,3 +1,4 @@
+import { detectProjectFileType } from './project-file-type';
 import { DeleteObjectsCommand, HeadBucketCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -22,6 +23,8 @@ const EXTENSIONS: Record<string, string> = {
   'image/gif': '.gif',
   'image/webp': '.webp',
   'application/pdf': '.pdf',
+  'video/mp4': '.mp4',
+  'video/webm': '.webm',
 };
 
 /** Cloudflare R2 (S3-compatible) object storage. */
@@ -49,11 +52,12 @@ export class StorageService {
    * Uploads files to `<folder>/<yyyy>/<mm>/<uuid>-<name>`. The real file type is checked from the
    * content, so a renamed executable cannot be stored as an image.
    */
-  async upload(files: Express.Multer.File[], folder: UploadFolder = 'uploads'): Promise<UploadedObject[]> {
+  async upload(files: Express.Multer.File[], folder: UploadFolder = 'uploads', projectMedia = false): Promise<UploadedObject[]> {
     if (!files.length) throw new BadRequestException('No files provided');
     const typed = files.map((file) => {
-      const type = detectFileType(file.buffer);
-      if (!type) throw new BadRequestException(`"${file.originalname}" is not a valid JPEG, PNG, WebP, GIF or PDF file.`);
+      const type = projectMedia ? detectProjectFileType(file.buffer) : detectFileType(file.buffer);
+      if (!type) throw new BadRequestException(`"${file.originalname}" has an unsupported or invalid file format.`);
+      if (projectMedia && type.startsWith('image/') && file.size > 10 * 1024 * 1024) throw new BadRequestException('Images must be 10 MB or smaller.');
       return { file, type };
     });
 

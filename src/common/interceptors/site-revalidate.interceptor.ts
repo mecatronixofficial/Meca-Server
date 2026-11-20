@@ -17,8 +17,9 @@ const TAGS_BY_CONTROLLER: Record<string, string[]> = {
   banner: ['banners'],
   // Founders and team (About page)
   team: ['team'],
-  // Contact details, social links, addresses and hours (header, footer, contact page)
-  settings: ['contact'],
+  // Contact details, social links, addresses and hours (header, footer, contact page),
+  // the "Technology" list (home page, hero, About page) and MECA's board (every page)
+  settings: ['contact', 'tech', 'meca'],
 };
 
 /**
