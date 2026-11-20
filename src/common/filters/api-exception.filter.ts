@@ -16,6 +16,35 @@ const PG_ERRORS: Record<string, ErrorShape> = {
   '22P02': { status: HttpStatus.BAD_REQUEST, message: 'Invalid identifier or value format' },
 };
 
+const DATABASE_UNAVAILABLE: ErrorShape = {
+  status: HttpStatus.SERVICE_UNAVAILABLE,
+  message: 'The database is busy or unreachable right now. Please try again in a moment.',
+};
+
+const SCHEMA_OUT_OF_DATE: ErrorShape = {
+  status: HttpStatus.INTERNAL_SERVER_ERROR,
+  message: 'The database is missing a table or column this version of the API needs. Run the database migrations, then try again.',
+};
+
+/** PostgreSQL classes 08 (connection), 53 (out of resources, e.g. 53300 too many connections) and 57P01–57P03 (restarting). */
+const PG_UNAVAILABLE = /^(08|53|57P0[1-3])/;
+const NETWORK_CODES = new Set(['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'ENOTFOUND', 'EAI_AGAIN', 'EPIPE']);
+/** node-postgres pool and socket failures that arrive without a code. */
+const UNAVAILABLE_MESSAGE = /timeout exceeded when trying to connect|connection terminated|too many clients|remaining connection slots|connection refused/i;
+
+/**
+ * Database failures with an action for whoever reads them: "try again" for capacity and
+ * connection problems, "run migrations" for a missing table or column. Details stay in the log.
+ */
+function describeDatabaseError(exception: unknown): ErrorShape | undefined {
+  const { code, message } = (exception ?? {}) as { code?: unknown; message?: unknown };
+  const pgCode = typeof code === 'string' ? code : '';
+  if (pgCode === '42P01' || pgCode === '42703') return SCHEMA_OUT_OF_DATE;
+  if (PG_UNAVAILABLE.test(pgCode) || NETWORK_CODES.has(pgCode)) return DATABASE_UNAVAILABLE;
+  if (typeof message === 'string' && UNAVAILABLE_MESSAGE.test(message)) return DATABASE_UNAVAILABLE;
+  return undefined;
+}
+
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger('Exceptions');
@@ -62,6 +91,6 @@ export class ApiExceptionFilter implements ExceptionFilter {
     if (parserError?.type === 'entity.parse.failed') return { status: HttpStatus.BAD_REQUEST, message: 'Invalid JSON format in request body.' };
     if (parserError?.type === 'entity.too.large') return { status: HttpStatus.PAYLOAD_TOO_LARGE, message: 'Request body is too large.' };
 
-    return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal server error' };
+    return describeDatabaseError(exception) ?? { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal server error' };
   }
 }

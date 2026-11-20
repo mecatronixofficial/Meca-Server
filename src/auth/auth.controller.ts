@@ -75,10 +75,14 @@ export class AuthController {
     return ok('Password reset successful');
   }
 
+  /**
+   * SameSite=strict: the admin must reach the API through its own domain (mec-admin proxies
+   * /mec-api on Vercel), never cross-site. Secure whenever served over HTTPS in production or on Vercel.
+   */
   private cookieOptions(): CookieOptions {
     return {
       httpOnly: true,
-      secure: this.config.get('NODE_ENV') === 'production',
+      secure: this.config.get('NODE_ENV') === 'production' || !!process.env.VERCEL,
       sameSite: 'strict',
       domain: this.config.get<string>('COOKIE_DOMAIN') || undefined,
       path: '/',

@@ -15,7 +15,7 @@ describe('website preview routes in AppModule', () => {
   const previewId = 'd20672b2-9c03-4c77-bd3c-cfb9256badf8';
   const repository = {
     create: jest.fn((value: CreateSitePreviewDto) => value),
-    save: jest.fn(async (value: object) => ({ ...value, id: previewId })),
+    save: jest.fn((value: object) => Promise.resolve({ ...value, id: previewId })),
   };
 
   beforeAll(async () => {

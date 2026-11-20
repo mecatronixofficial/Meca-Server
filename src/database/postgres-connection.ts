@@ -19,6 +19,17 @@ export function postgresSsl(env: Env): false | { ca?: string; rejectUnauthorized
   return { ca: pem, rejectUnauthorized: true };
 }
 
+/**
+ * node-postgres pool settings. On serverless hosts (Vercel) every warm instance keeps its own
+ * pool, and small managed databases (e.g. Aiven's ~20 connections) run out quickly: keep each
+ * pool to a few connections and release idle ones fast so frozen instances don't hold them.
+ */
+export function poolOptions(limit: number, serverless: boolean) {
+  return serverless
+    ? { max: Math.min(limit, 3), connectionTimeoutMillis: 10_000, idleTimeoutMillis: 5_000, allowExitOnIdle: true }
+    : { max: limit, connectionTimeoutMillis: 5_000, idleTimeoutMillis: 30_000 };
+}
+
 /** Removes `sslmode`/`ssl*` URL params, which would otherwise override the explicit TLS settings above. */
 export function postgresUrl(url: string): string {
   const parsed = new URL(url);
